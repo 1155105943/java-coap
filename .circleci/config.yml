@@ -34,6 +34,20 @@ jobs:
     #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
     # The following `checkout` command checks out your code to your working directory. In 1.0 we did this implicitly. In 2.0 you can choose where in the course of a job your code should be checked out.
     - checkout
+
+    - run:
+        name: enable ipv6
+        command: |
+          cat <<'EOF' | sudo tee /etc/docker/daemon.json
+          {
+            "ipv6": true,
+            "fixed-cidr-v6": "2001:db8:1::/64"
+          }
+          EOF
+          sudo service docker restart
+
+    - run: echo 127.0.0.1 localhost | sudo tee -a /etc/hosts
+
     # Prepare for artifact and test results  collection equivalent to how it was done on 1.0.
     # In many cases you can simplify this from what is generated here.
     # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
@@ -47,7 +61,7 @@ jobs:
         key: mbed-java-coap-{{ checksum "pom.xml" }}
     # This is based on your 1.0 configuration file or project settings
     - run: mvn dependency:go-offline install -DskipTests
-    - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.0:go-offline install -DskipTests
+
     # Save dependency cache
     - save_cache:
         key: mbed-java-coap-{{ checksum "pom.xml" }}
