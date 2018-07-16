@@ -32,6 +32,7 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ public class CoapTcpMessaging extends CoapMessaging implements CoapReceiverForTc
     private final ConcurrentMap<DelayedTransactionId, RequestCallback> transactions = new ConcurrentHashMap<>();
     private final CoapTcpCSMStorage csmStorage;
     private final CoapTcpCSM ownCapability;
+    private Consumer<InetSocketAddress> disconnectConsumer;
 
     public CoapTcpMessaging(CoapTransport coapTransport, CoapTcpCSMStorage csmStorage, boolean useBlockWiseTransfer, int maxMessageSize) {
         super(coapTransport);
@@ -153,6 +155,11 @@ public class CoapTcpMessaging extends CoapMessaging implements CoapReceiverForTc
     }
 
     @Override
+    public void setDisconnectHandler(Consumer<InetSocketAddress> disconnectConsumer) {
+        this.disconnectConsumer = disconnectConsumer;
+    }
+
+    @Override
     public void onConnected(InetSocketAddress remoteAddress) {
         CoapPacket packet = new CoapPacket(remoteAddress);
         packet.setCode(Code.C701_CSM);
@@ -174,7 +181,9 @@ public class CoapTcpMessaging extends CoapMessaging implements CoapReceiverForTc
                 removeTransactionExceptionally(transId, new IOException("Socket closed"));
             }
         }
-
+        if (disconnectConsumer != null) {
+            disconnectConsumer.accept(remoteAddress);
+        }
         LOGGER.info("[{}] Disconnected", remoteAddress);
     }
 

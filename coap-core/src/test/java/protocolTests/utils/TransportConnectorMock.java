@@ -19,6 +19,7 @@ import com.mbed.coap.exception.CoapException;
 import com.mbed.coap.packet.CoapPacket;
 import com.mbed.coap.transport.BlockingCoapTransport;
 import com.mbed.coap.transport.CoapReceiver;
+import com.mbed.coap.transport.CoapReceiverForTcp;
 import com.mbed.coap.transport.TransportContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -71,6 +72,10 @@ public class TransportConnectorMock extends BlockingCoapTransport {
             e.printStackTrace();
         }
 
+    }
+
+    public void disconnect() {
+        CoapReceiverForTcp.from(transReceiver).onDisconnected(InetSocketAddress.createUnresolved("localhost", 5683));
     }
 
     public CoapPacket getLastOutgoingMessage() {

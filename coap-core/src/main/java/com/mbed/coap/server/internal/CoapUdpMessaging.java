@@ -37,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -341,6 +342,11 @@ public class CoapUdpMessaging extends CoapMessaging {
             return true;
         }
         return super.handleObservation(packet, transportContext);
+    }
+
+    @Override
+    public void setDisconnectHandler(Consumer<InetSocketAddress> disconnectConsumer) {
+        //do nothing, not applicable in UDP transport
     }
 
     @Override

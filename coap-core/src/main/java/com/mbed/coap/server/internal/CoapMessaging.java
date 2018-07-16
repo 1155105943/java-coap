@@ -25,6 +25,7 @@ import com.mbed.coap.utils.Callback;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,4 +189,5 @@ public abstract class CoapMessaging implements CoapReceiver {
         return coapRequestHandler.handleObservation(packet, transContext);
     }
 
+    public abstract void setDisconnectHandler(Consumer<InetSocketAddress> disconnectConsumer);
 }

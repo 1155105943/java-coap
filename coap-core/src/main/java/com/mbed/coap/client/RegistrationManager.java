@@ -93,6 +93,11 @@ public class RegistrationManager {
         this.registrationLinks = () -> LinkFormatBuilder.toString(server.getResourceLinks());
         this.minRetryDelay = minRetryDelay;
         this.maxRetryDelay = maxRetryDelay;
+
+        server.setDisconnectHandler(address -> {
+            LOGGER.warn("Disconnected, reconnecting...");
+            updateRegistration();
+        });
     }
 
     private String epNameFrom(URI registrationUri) {
