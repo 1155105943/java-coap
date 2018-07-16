@@ -24,6 +24,7 @@ import com.mbed.coap.server.CoapServerBuilder;
 import com.mbed.coap.transport.CoapTransport;
 import com.mbed.coap.transport.javassl.CoapSerializer;
 import com.mbed.coap.transport.javassl.SSLSocketClientTransport;
+import com.mbed.coap.transport.javassl.SocketClientTransport;
 import com.mbed.coap.transport.udp.DatagramSocketTransport;
 import com.mbed.coap.utils.ReadOnlyCoapResource;
 import java.io.FileInputStream;
@@ -37,6 +38,7 @@ import java.util.Enumeration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -57,8 +59,9 @@ public class DeviceEmulator {
         if (args.length == 0) {
             System.out.println("Usage: ");
             System.out.println("  ./run.sh [-k KEYSTORE_FILE] <registration-url> \n");
-            System.out.println("  example:");
+            System.out.println("  examples:");
             System.out.println("  ./run.sh -k device01.jks 'coaps://localhost:5684/rd?ep=device01&aid=d'");
+            System.out.println("  ./run.sh -k device01.jks 'coaps+tcp://localhost:5684/rd?ep=device01&aid=d'");
             return;
         }
 
@@ -113,19 +116,26 @@ public class DeviceEmulator {
     }
 
     private CoapTransport createTransport(String keystoreFile, URI uri) {
-        CoapTransport coapTransport;
+        SSLContext sslContext;
 
-        if (uri.getScheme().equals("coap")) {
-            coapTransport = new DatagramSocketTransport(0);
-        } else if (uri.getScheme().equals("coaps")) {
+        switch (uri.getScheme()) {
+            case "coap":
+                return new DatagramSocketTransport(0);
 
-            SSLContext sslContext = sslContextFromKeystore(keystoreFile, "secret".toCharArray());
+            case "coaps":
+                sslContext = sslContextFromKeystore(keystoreFile, "secret".toCharArray());
+                return new SSLSocketClientTransport(new InetSocketAddress(uri.getHost(), uri.getPort()), sslContext.getSocketFactory(), CoapSerializer.UDP);
 
-            coapTransport = new SSLSocketClientTransport(new InetSocketAddress(uri.getHost(), uri.getPort()), sslContext.getSocketFactory(), CoapSerializer.UDP);
-        } else {
-            throw new IllegalArgumentException("Protocol not supported: " + uri.getScheme());
+            case "coaps+tcp":
+                sslContext = sslContextFromKeystore(keystoreFile, "secret".toCharArray());
+                return new SSLSocketClientTransport(new InetSocketAddress(uri.getHost(), uri.getPort()), sslContext.getSocketFactory(), CoapSerializer.TCP);
+
+            case "coap+tcp":
+                return new SocketClientTransport(new InetSocketAddress(uri.getHost(), uri.getPort()), SocketFactory.getDefault(), CoapSerializer.TCP);
+
+            default:
+                throw new IllegalArgumentException("Protocol not supported: " + uri.getScheme());
         }
-        return coapTransport;
     }
 
     RegistrationManager getRegistrationManager() {
