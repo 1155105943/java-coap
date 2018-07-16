@@ -34,8 +34,10 @@ import com.mbed.coap.transport.TransportContext;
 import com.mbed.coap.utils.Callback;
 import com.mbed.coap.utils.FutureCallbackAdapter;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -221,6 +223,17 @@ public class CoapTcpMessagingTest {
         assertThatThrownBy(resp::get).hasCauseExactlyInstanceOf(CoapException.class);
     }
 
+    @Test
+    public void should_call_handler_when_disconnected() {
+        Consumer<InetSocketAddress> handler = mock(Consumer.class);
+        tcpMessaging.setDisconnectHandler(handler);
+
+        tcpMessaging.onDisconnected(LOCAL_1_5683);
+        verify(handler).accept(eq(LOCAL_1_5683));
+
+        tcpMessaging.onDisconnected(LOCAL_5683);
+        verify(handler).accept(eq(LOCAL_5683));
+    }
 
     //=======================================================================
 
