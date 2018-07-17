@@ -42,7 +42,7 @@ import org.junit.Test;
 public class MulticastTest {
 
     @Test
-    //    @Ignore
+    @Ignore
     public void multicastConnection() throws IOException, CoapException {
         CoapServer server = CoapServerBuilder.newBuilder()
                 .transport(new MulticastSocketTransport(new InetSocketAddress(0), MulticastSocketTransport.MCAST_LINKLOCAL_ALLNODES)).build();

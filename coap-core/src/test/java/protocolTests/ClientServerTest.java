@@ -47,6 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -180,6 +181,7 @@ public class ClientServerTest {
     }
 
     @Test
+    @Ignore
     public void simpleIPv6Request() throws CoapException, IOException {
         InetAddress adr = InetAddress.getByName("::1");
 
@@ -260,6 +262,7 @@ public class ClientServerTest {
     }
 
     @Test
+    @Ignore
     public void reusePortSocketImpl() throws IOException, CoapException {
         MulticastSocketTransport udpConnector = new MulticastSocketTransport(new InetSocketAddress(0), MulticastSocketTransport.MCAST_LINKLOCAL_ALLNODES); //new UDPMulticastConnector(61601, UDPMulticastConnector.MCAST_LINKLOCAL_ALLNODES);
         CoapServer srv = CoapServer.builder().transport(udpConnector).build();
