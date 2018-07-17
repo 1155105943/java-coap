@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class InMemoryCoapTransport extends BlockingCoapTransport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryCoapTransport.class.getName());
-    public final static String LOCALHOST = "localhost";
+    public final static String LOCALHOST = "127.0.0.1";
 
     private CoapReceiver coapReceiver;
     private final static BindingManager BINDING_MANAGER = new BindingManager();
